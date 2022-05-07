@@ -18,8 +18,11 @@
     "nodemon": "^2.0.16"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "dayjs": "^1.11.2",
     "dotenv": "^16.0.0",
     "joi": "^17.6.0",
-    "mongodb": "^4.5.0"
+    "mongodb": "^4.5.0",
+    "uuid": "^8.3.2"
   }
 }
