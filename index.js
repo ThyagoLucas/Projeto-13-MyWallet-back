@@ -72,27 +72,63 @@ app.post("/login", async (req, res) =>{
 
 app.get("/info-account", async (req,res)=>{
 
+    console.log('Entrou no server')
     const {authorization} = req.headers;
+    
     const token = authorization?.replace('Bearer', '').trim();
     if(token === undefined){
         return res.status(404).send("Authorization não encontrado ou inválido");
     }
-    
+
     try {
         
         const infoSession = await db.collection("sessions").findOne({token:token});
         const nameUser = await db.collection("users").findOne({_id:infoSession.user});
-        res.send(nameUser.name);
-
-
-    } catch (error) {
+        const movimentations = await db.collection("transactions").find({userID:infoSession.user}).toArray();
+        console.log(movimentations);
+        let total = 0;
+        movimentations.forEach(transaction =>{
+            transaction.typeOperation === 'cashIn'
+            ?total = total+transaction.value
+            :total = total- transaction.value
+        });
+        const firstName = nameUser.name.split(' ');
+        const response = {name:firstName[0], transactions:movimentations, total:total}
+        console.log(response);
+        res.send(response);
         
+    } catch (error) {
+        console.log(error);
     }
     
+});
 
+app.post("/movimentation", async (req, res)=>{
 
+    const day = dayjs().format('DD');
+    const month = dayjs().format('MM');
+    const year = dayjs().format('YYYY');
 
+    const {authorization} = req.headers;
+    const token = authorization?.replace('Bearer','').trim();
 
+    if(token === undefined){
+        return res.status(401).send("cabeçalho da requisição inválido");
+    }
+
+    const {type, description, value} = req.body;
+    try {
+        const infoSession = await db.collection("sessions").findOne({token:token});
+        const infoUser = await db.collection("users").findOne({_id:infoSession.user});
+        let floatValue = value.replace(',', '.');
+        await db.collection("transactions").insertOne({ userID:infoUser._id, day:day, month:month, year:year, typeOperation:type, description:description, value:parseFloat  (floatValue)})
+        
+        res.status(201).send("cadastrado com sucesso");
+ 
+    } catch (error) {
+        console.log("Erro na linha 124", error);
+    }
+    
 })
 
 
