@@ -1,7 +1,8 @@
 import db from "../db.js";
+import { v4 } from "uuid";
+import dayjs from "dayjs";
 
-
-export async function postCadastro(req, res){
+export async function postRegister(req, res){
     
     const {name, email, password, confPassword} = req.body;
     
@@ -18,10 +19,8 @@ export async function postCadastro(req, res){
         console.log(error);
     }
 }
-
-
-export async function login(req, res){
-
+export async function postLogin(req, res){
+    console.log("entrou aqui na requisição de login")
     const {email, password} = req.body;
     const findUser = await db.collection('users').findOne({email:`${email.toLowerCase()}`});
     if(findUser === null){
@@ -31,10 +30,12 @@ export async function login(req, res){
     try {
 
         if(password === findUser.password){
+            
             const token = v4();
             const hour = dayjs().format("HH:mm:ss");
 
             await db.collection('sessions').insertOne({user:findUser._id, token:token, hour:hour});
+
             res.status(201).send(token);
         }
         else{

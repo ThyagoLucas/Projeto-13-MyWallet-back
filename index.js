@@ -1,22 +1,21 @@
 import express from "express";
 import cors from 'cors';
 
-import { login, postCadastro } from "./controllers/cadastroController.js";
-import { getInfoAccount } from "./controllers/infoAccountController.js";
-import { sendTransaction } from "./controllers/AccountMovimentationController.js";
+import loginAndRegisterRouter from "./routers/loginAndRegisterRouter.js";
+import infoAccountRouter from "./routers/infoAccountRouter.js";
+import transaction from "./routers/addTransactionRouter.js";
 
 const app = express();
+app.use(cors());
+app.use(express.json());
 
 app.listen(5000, ()=>{
     console.log("Servidor rodando na porta 5000");
 });
 
-app.use(cors());
-app.use(express.json());
+//routers
+app.use(loginAndRegisterRouter);
 
-app.post("/cadastro", postCadastro);
-app.post("/login",  login);
+app.use(infoAccountRouter);
 
-app.get("/info-account", getInfoAccount);
-
-app.post("/movimentation", sendTransaction);
+app.use(transaction)
